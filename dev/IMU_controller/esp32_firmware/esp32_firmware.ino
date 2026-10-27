@@ -1,5 +1,4 @@
-// IVY - Switch Pro Controller + MPU-6050 tilt sensing on ESP32 (Bluepad32)
-// Board:  Tools > Board > esp32_bluepad32 > ESP32 Dev Module     Serial: 115200
+// DEV - Switch Pro Controller + tilt sensing on ESP32
 
 #include <Bluepad32.h>
 #include <Wire.h>
@@ -55,7 +54,7 @@ enum ImuState
 const char *IMU_NAMES[] = {"NOIMU", "NOCAL", "CAL", "OK", "TIP"};
 ImuState imuState = IMU_NONE;
 
-V3 up = {0, 0, 1}; // filtered "which way is up" in the sensor's own frame
+V3 up = {0, 0, 1};
 bool upInit = false;
 V3 refUp = {0, 0, 1};              // up direction captured at calibration
 V3 e1 = {1, 0, 0}, e2 = {0, 1, 0}; // axes around the rod for lean direction
@@ -72,13 +71,11 @@ void onConnectedController(ControllerPtr c)
   if (pad == nullptr)
   {
     pad = c;
-    ControllerProperties p = c->getProperties();
-    Serial.printf("# CONNECTED %s (VID=0x%04x PID=0x%04x)\n",
-                  c->getModelName().c_str(), p.vendor_id, p.product_id);
+    Serial.println("# Controller connected");
   }
   else
   {
-    Serial.println("# Extra controller connected - ignoring it");
+    Serial.println("# Extra controller ignored");
   }
 }
 
@@ -87,7 +84,7 @@ void onDisconnectedController(ControllerPtr c)
   if (c == pad)
   {
     pad = nullptr;
-    Serial.println("# DISCONNECTED");
+    Serial.println("# Controller disconnected");
   }
 }
 
@@ -120,13 +117,7 @@ bool mpuInit()
   mpuWrite(0x1B, 0x00); // GYRO_CONFIG: +/-250 deg/s  (131 LSB per deg/s)
   mpuWrite(0x1C, 0x00); // ACCEL_CONFIG: +/-2 g       (16384 LSB per g)
 
-  Wire.beginTransmission(MPU_ADDR);
-  Wire.write(0x75); // WHO_AM_I
-  Wire.endTransmission(false);
-  uint8_t who = 0;
-  if (Wire.requestFrom(MPU_ADDR, (uint8_t)1) == 1)
-    who = Wire.read();
-  Serial.printf("# MPU-6050 found at 0x%02X (WHO_AM_I=0x%02X)\n", MPU_ADDR, who);
+  Serial.println("# IMU found");
   return true;
 }
 
@@ -156,7 +147,7 @@ void startCalibration()
 {
   if (imuState == IMU_NONE)
   {
-    Serial.println("# Can't calibrate - no IMU detected (check wiring, then reset)");
+    Serial.println("# IMU not found");
     return;
   }
   imuState = IMU_CAL;
@@ -164,7 +155,7 @@ void startCalibration()
   calN = 0;
   calAcc = {0, 0, 0};
   calGyro = {0, 0, 0};
-  Serial.println("# Calibrating - hold the rod upright and still");
+  Serial.println("# Calibrating");
 }
 
 void finishCalibration()
@@ -172,7 +163,7 @@ void finishCalibration()
   if (calN < 10)
   {
     imuState = IMU_NOCAL;
-    Serial.println("# Calibration failed (no samples)");
+    Serial.println("# Calibration failed");
     return;
   }
 
@@ -181,7 +172,7 @@ void finishCalibration()
   if (g < 0.8f || g > 1.2f)
   {
     imuState = IMU_NOCAL;
-    Serial.printf("# Calibration failed - moving too much (%.2f g). Try again.\n", g);
+    Serial.println("# Calibration failed");
     return;
   }
   gyroBias = vScale(calGyro, 1.0f / calN);
@@ -191,7 +182,6 @@ void finishCalibration()
   // Reference axes perpendicular to the rod, built from whichever sensor axis
   // is most sideways. Lean direction 0 deg points along that axis.
   V3 axes[3] = {{1, 0, 0}, {0, 1, 0}, {0, 0, 1}};
-  const char names[3] = {'X', 'Y', 'Z'};
   int best = 0;
   for (int i = 1; i < 3; i++)
     if (fabsf(vDot(axes[i], refUp)) < fabsf(vDot(axes[best], refUp)))
@@ -202,7 +192,7 @@ void finishCalibration()
   tiltDeg = 0;
   tiltDir = 0;
   imuState = IMU_OK;
-  Serial.printf("# CALIBRATED - lean 0 deg points along the IMU's +%c axis\n", names[best]);
+  Serial.println("# Calibrated");
   buzz(150, 0x80, 0x40);
 }
 
@@ -217,7 +207,7 @@ void imuUpdate()
   lastImuUs = now;
   float dt = elapsed * 1e-6f;
   if (dt > 0.05f)
-    dt = 0.05f; // ignore long gaps (e.g. first sample)
+    dt = 0.05f;
 
   V3 a, g;
   if (!mpuRead(a, g))
@@ -233,9 +223,6 @@ void imuUpdate()
     return;
   }
 
-  // Complementary filter on the "up" vector:
-  //   gyro: rotate the previous estimate (smooth, but drifts over time)
-  //   accel: gravity direction (absolute, but noisy when the rod is shaken)
   if (!upInit)
   {
     up = vNorm(a);
@@ -267,13 +254,13 @@ void imuUpdate()
     if (imuState == IMU_OK && tiltDeg > TIP_ON_DEG)
     {
       imuState = IMU_TIP;
-      Serial.printf("# TIPPING (%.1f deg)\n", tiltDeg);
+      Serial.println("# Tipping");
       buzz(250, 0xC0, 0xC0);
     }
     else if (imuState == IMU_TIP && tiltDeg < TIP_OFF_DEG)
     {
       imuState = IMU_OK;
-      Serial.println("# UPRIGHT again");
+      Serial.println("# Upright");
     }
   }
 }
@@ -301,11 +288,11 @@ String buttonString(ControllerPtr c)
       s += '+';
     s += name;
   };
-  // Bluepad32 names buttons by POSITION (Xbox-style); a() may be the button printed "B".
-  add(c->a(), "A");
-  add(c->b(), "B");
-  add(c->x(), "X");
-  add(c->y(), "Y");
+
+  add(c->b(), "A");
+  add(c->a(), "B");
+  add(c->y(), "X");
+  add(c->x(), "Y");
   add(c->l1(), "L");
   add(c->r1(), "R");
   add(c->l2(), "ZL");
@@ -329,7 +316,6 @@ void setup()
   Serial.begin(115200);
   delay(300);
 
-  Serial.printf("# Bluepad32 firmware: %s\n", BP32.firmwareVersion());
   BP32.setup(&onConnectedController, &onDisconnectedController);
   if (FORGET_ON_BOOT)
     BP32.forgetBluetoothKeys();
@@ -338,15 +324,14 @@ void setup()
   if (mpuInit())
   {
     imuState = IMU_NOCAL;
-    Serial.println("# Stand the rod upright and press HOME to calibrate");
+    Serial.println("# Press HOME to calibrate");
   }
   else
   {
     imuState = IMU_NONE;
-    Serial.printf("# No MPU-6050 at 0x%02X - check VCC/GND/SDA(21)/SCL(22)\n", MPU_ADDR);
+    Serial.println("# IMU not found");
   }
   lastImuUs = micros();
-  Serial.println("# FIELDS fwd,turn,angle,mag,lx,ly,rx,ry,buttons,conn,imu,tilt,tiltdir");
 }
 
 void loop()
@@ -399,7 +384,7 @@ void loop()
   if (!connected && now - lastWaitMsg >= 3000)
   {
     lastWaitMsg = now;
-    Serial.println("# Waiting for controller - hold the sync button on top of the Pro Controller");
+    Serial.println("# Waiting for controller, press sync button");
   }
 
   delay(1);
