@@ -118,29 +118,33 @@ def color_name(crop):
     if crop is None or crop.size == 0:
         return 'UNKNOWN'
     hsv = cv2.cvtColor(crop, cv2.COLOR_BGR2HSV)
-    # Count colored pixels instead of taking a median hue (hue wraps at red).
     h, s, v = cv2.split(hsv)
-    colored = (s >= 55) & (v >= 45)
+    # Pink is commonly a bright, less saturated red or magenta.
+    # Count it separately before classifying remaining pixels as red.
+    colored = (s >= 25) & (v >= 45)
     if np.count_nonzero(colored) < .12 * h.size:
-        val = float(np.median(v))
-        if val < 60:
+        brightness = float(np.median(v))
+        if brightness < 60:
             return 'BLACK'
-        return 'WHITE' if val >= 190 else 'GRAY'
+        return 'WHITE' if brightness >= 190 else 'GRAY'
 
-    hue = h[colored]
-    sat = s[colored]
-    val = v[colored]
+    hue, sat, val = h[colored], s[colored], v[colored]
+    red_hue = (hue < 11) | (hue >= 170)
+    # Low/moderate saturation + high brightness gives pastel/hot pink;
+    # high-hue magenta is also considered pink when sufficiently bright.
+    pink = ((red_hue & (sat >= 25) & (sat <= 175) & (val >= 135)) |
+            ((hue >= 155) & (hue < 170) & (sat >= 35) & (val >= 125)))
+    orange = (hue >= 11) & (hue < 20)
     labels = {
-        'RED': ((hue < 11) | (hue >= 170)),
-        'ORANGE': ((hue >= 11) & (hue < 20)),
-        'YELLOW': ((hue >= 20) & (hue < 35)),
-        'GREEN': ((hue >= 35) & (hue < 85)),
-        'BLUE': ((hue >= 85) & (hue < 130)),
-        'PURPLE': ((hue >= 130) & (hue < 170)),
+        'PINK': pink,
+        'RED': red_hue & ~pink,
+        'BROWN': orange & (val < 155),
+        'ORANGE': orange & (val >= 155),
+        'YELLOW': (hue >= 20) & (hue < 35),
+        'GREEN': (hue >= 35) & (hue < 85),
+        'BLUE': (hue >= 85) & (hue < 130),
+        'PURPLE': (hue >= 130) & (hue < 155),
     }
-    # Brown is a *dark orange*, not a dark red.
-    labels['BROWN'] = labels['ORANGE'] & (val < 155)
-    labels['ORANGE'] = labels['ORANGE'] & (val >= 155)
     scores = {name: int(np.count_nonzero(mask)) for name, mask in labels.items()}
     best = max(scores, key=scores.get)
     return best if scores[best] >= .25 * len(hue) else 'UNKNOWN'
