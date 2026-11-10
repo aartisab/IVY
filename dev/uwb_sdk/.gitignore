@@ -1,0 +1,17 @@
+# Ignore every file
+*
+
+# Allow Git to traverse folders and find the exceptions below.
+!*/
+
+# Track this ignore file.
+!.gitignore
+
+# Track only these seven SDK files (add more as needed)
+!/Src/Boards/Src/nRF52840DK/FreeRTOS/nRF52840DK.c
+!/SDK_BSP/Nordic/CMakeLists.txt
+!/Projects/FreeRTOS/CLI/nRF52840DK/ProjectDefinition/sdk_config.h
+!/Projects/FreeRTOS/CLI/nRF52840DK/ProjectDefinition/uwb_stack_llhw.cmake
+!/Libs/uwb-stack/libs/qhal/src/nrfx/qspi.c
+!/Projects/FreeRTOS/CLI/nRF52840DK/project_CLI.cmake
+!/Src/Helpers/Inc/uwb_convert.h
