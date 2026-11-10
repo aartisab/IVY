@@ -8,10 +8,10 @@
 !.gitignore
 
 # Track only these seven SDK files (add more as needed)
-!/SDK/Firmware/Src/Boards/Src/nRF52840DK/FreeRTOS/nRF52840DK.c
-!/SDK/Firmware/SDK_BSP/Nordic/CMakeLists.txt
-!/SDK/Firmware/Projects/FreeRTOS/CLI/nRF52840DK/ProjectDefinition/sdk_config.h
-!/SDK/Firmware/Projects/FreeRTOS/CLI/nRF52840DK/ProjectDefinition/uwb_stack_llhw.cmake
-!/SDK/Firmware/Libs/uwb-stack/libs/qhal/src/nrfx/qspi.c
-!/SDK/Firmware/Projects/FreeRTOS/CLI/nRF52840DK/project_CLI.cmake
-!/SDK/Firmware/Src/Helpers/Inc/uwb_convert.h
+!/SDK/Firmware/DW3_QM33_SDK_1.1.1/Src/Boards/Src/nRF52840DK/FreeRTOS/nRF52840DK.c
+!/SDK/Firmware/DW3_QM33_SDK_1.1.1/SDK_BSP/Nordic/CMakeLists.txt
+!/SDK/Firmware/DW3_QM33_SDK_1.1.1/Projects/FreeRTOS/CLI/nRF52840DK/ProjectDefinition/sdk_config.h
+!/SDK/Firmware/DW3_QM33_SDK_1.1.1/Projects/FreeRTOS/CLI/nRF52840DK/ProjectDefinition/uwb_stack_llhw.cmake
+!/SDK/Firmware/DW3_QM33_SDK_1.1.1/Libs/uwb-stack/libs/qhal/src/nrfx/qspi.c
+!/SDK/Firmware/DW3_QM33_SDK_1.1.1/Projects/FreeRTOS/CLI/nRF52840DK/project_CLI.cmake
+!/SDK/Firmware/DW3_QM33_SDK_1.1.1/Src/Helpers/Inc/uwb_convert.h
