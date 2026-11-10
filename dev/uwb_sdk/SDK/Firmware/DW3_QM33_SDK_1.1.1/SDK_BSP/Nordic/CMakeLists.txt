@@ -20,6 +20,7 @@ set(SDK_SRC
     ${SDK_VERSION}/modules/nrfx/drivers/src/nrfx_rtc.c
     ${SDK_VERSION}/modules/nrfx/drivers/src/nrfx_spi.c
     ${SDK_VERSION}/modules/nrfx/drivers/src/nrfx_spim.c
+    ${SDK_VERSION}/modules/nrfx/drivers/src/nrfx_spis.c
     ${SDK_VERSION}/modules/nrfx/drivers/src/nrfx_uart.c
     ${SDK_VERSION}/modules/nrfx/drivers/src/nrfx_uarte.c
     ${SDK_VERSION}/modules/nrfx/drivers/src/nrfx_power.c

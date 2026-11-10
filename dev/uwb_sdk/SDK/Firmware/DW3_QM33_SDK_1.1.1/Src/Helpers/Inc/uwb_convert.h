@@ -13,6 +13,7 @@
 #pragma once
 
 #include <stdio.h>
+#include <stdint.h>
 
 float convert_aoa_2pi_q16_to_deg(int16_t aoa_2pi_q16);
 float convert_rssi_q7_to_dbm(uint8_t rssi_q7);

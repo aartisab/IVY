@@ -3455,7 +3455,7 @@
 // <e> NRFX_SPIS_ENABLED - nrfx_spis - SPIS peripheral driver
 //==========================================================
 #ifndef NRFX_SPIS_ENABLED
-#define NRFX_SPIS_ENABLED 0
+#define NRFX_SPIS_ENABLED 1
 #endif
 // <q> NRFX_SPIS0_ENABLED  - Enable SPIS0 instance
 
@@ -3468,7 +3468,7 @@
 
 
 #ifndef NRFX_SPIS1_ENABLED
-#define NRFX_SPIS1_ENABLED 0
+#define NRFX_SPIS1_ENABLED 1
 #endif
 
 // <q> NRFX_SPIS2_ENABLED  - Enable SPIS2 instance
@@ -5354,7 +5354,7 @@
 // <e> SPIS_ENABLED - nrf_drv_spis - SPIS peripheral driver - legacy layer
 //==========================================================
 #ifndef SPIS_ENABLED
-#define SPIS_ENABLED 0
+#define SPIS_ENABLED 1
 #endif
 // <o> SPIS_DEFAULT_CONFIG_IRQ_PRIORITY  - Interrupt priority
 
@@ -5418,7 +5418,7 @@
 
 
 #ifndef SPIS1_ENABLED
-#define SPIS1_ENABLED 0
+#define SPIS1_ENABLED 1
 #endif
 
 // <q> SPIS2_ENABLED  - Enable SPIS2 instance

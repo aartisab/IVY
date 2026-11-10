@@ -14,6 +14,7 @@
 #include <qspi.h>
 #include <stdbool.h>
 #include <string.h>
+#include "nrfx_spis.h"
 
 #if NRFX_SPI_ENABLED
 #include "nrfx_spi.h"
@@ -382,7 +383,7 @@ static enum qerr spi_config_master(struct qspi *const spi, const struct qspi_con
 }
 
 #if NRFX_SPIS_ENABLED
-static enum qerr spi_config_slave(struct qspi *spi, struct qspi_config *config)
+static enum qerr spi_config_slave(struct qspi *spi, const struct qspi_config *config)
 {
 	nrfx_err_t r = NRFX_ERROR_INVALID_PARAM;
 

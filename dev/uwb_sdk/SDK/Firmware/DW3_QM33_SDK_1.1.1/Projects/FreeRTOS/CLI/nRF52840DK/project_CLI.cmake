@@ -10,7 +10,7 @@ set(MY_CPU NRF52840_XXAA)
 set(MY_LD_FILE nRF52840.ld)
 
 set(CMAKE_CUSTOM_C_FLAGS
-    "-Werror \
+    "-Werror -Wno-error=array-bounds \
     -DBOARD_CUSTOM \
     -DUSB_ENABLE \
     -DCONFIG_GPIO_AS_PINRESET"
